@@ -22,9 +22,9 @@ export default function Members({onChange}: MembersProps) {
 
   return (
     <div>
-      Members:
+      <h1>Members:</h1>
       {members.map((member) => member.name).join(', ')}
-      <button onClick={handleClick}>+</button>
+      <div><button onClick={handleClick}>+</button></div>
     </div>
   )
 }

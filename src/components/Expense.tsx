@@ -1,13 +1,19 @@
 import { ChangeEvent, useState } from "react"
 import Members, { Member, MembersList } from './Members'
 
+export type Expense = {
+  amount: number,
+  payer: Member,
+  involvedMembers: Member[]
+}
+
 export default function Expense() {
   let [, setAmount] = useState(0)
   let [members, setMembers] = useState<MembersList>([])
   let [payer, setPayer] = useState<Member>()
 
   function handleAmountChange(event: ChangeEvent<HTMLInputElement>) {
-    setAmount(parseInt(event.target.value))
+  setAmount(parseInt(event.target.value))
   }
 
   function handleSelectPayer(event: ChangeEvent<HTMLSelectElement>) {
