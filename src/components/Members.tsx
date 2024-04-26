@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
+import { v4 as uuidv4 } from 'uuid';
 
-export type Member = {name: string}
+export type Member = {name: string, uuid: string}
 export type MembersList = Member[]
 interface MembersProps {
   onChange: (members: MembersList)=> void;
@@ -16,7 +17,8 @@ export default function Members({onChange}: MembersProps) {
   function handleClick() {
     const name = prompt("Member name:")
     if(name) {
-      setMembers([...members, { name }])
+      const uuid = uuidv4();
+      setMembers([...members, { name, uuid }])
     }
   }
 

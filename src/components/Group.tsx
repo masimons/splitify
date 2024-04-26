@@ -7,12 +7,11 @@ import Dialog from '@mui/material/Dialog';
 
 interface AddExpenseDialogProps {
   open: boolean,
-  onClose: ()=> void
+  onClose: ()=> void,
+  members: MembersList
 }
 
 function AddExpenseDialog(props: AddExpenseDialogProps) {
- 
-
   return (
     <Dialog
       open={props.open}
@@ -21,7 +20,7 @@ function AddExpenseDialog(props: AddExpenseDialogProps) {
       aria-describedby="modal-modal-description"
     >
       <Box sx={{p: 3}}>
-        <Expense></Expense>
+        <Expense members={props.members} />
       </Box>
     </Dialog>
   )
@@ -45,7 +44,7 @@ export default function Group() {
       <div>
         <h1>Expenses:</h1>
         <Button onClick={handleExpenseOpen}>Add Expense</Button>
-        <AddExpenseDialog open={open} onClose={handleExpenseClose} />
+        <AddExpenseDialog open={open} onClose={handleExpenseClose} members={members} />
         {/* {expenses.map((expense) => expense.name)} */}
       </div>
     </div> 

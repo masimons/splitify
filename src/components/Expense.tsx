@@ -1,5 +1,5 @@
 import { ChangeEvent, useState } from "react"
-import Members, { Member, MembersList } from './Members'
+import { Member, MembersList } from './Members'
 
 export type Expense = {
   amount: number,
@@ -7,22 +7,17 @@ export type Expense = {
   involvedMembers: Member[]
 }
 
-export default function Expense() {
+export default function Expense(members: MembersList) {
   let [, setAmount] = useState(0)
-  let [members, setMembers] = useState<MembersList>([])
   let [payer, setPayer] = useState<Member>()
 
   function handleAmountChange(event: ChangeEvent<HTMLInputElement>) {
-  setAmount(parseInt(event.target.value))
+    setAmount(parseInt(event.target.value))
   }
 
   function handleSelectPayer(event: ChangeEvent<HTMLSelectElement>) {
-    let payer = members.find((member) => member.name === event.target.value)
+    let payer = members.members.find((member) => member.uuid === event.target.value)
     setPayer(payer)
-  }
-
-  function onMemberAdd(members: MembersList) {
-    setMembers(members)
   }
 
   return (
@@ -34,11 +29,10 @@ export default function Expense() {
         Amount:
         <input onChange={handleAmountChange} />
       </div>
-      <Members onChange={onMemberAdd} />
       <div>
         Paid by: {payer?.name}
         <select onChange={handleSelectPayer}>
-          {members.map((member) => <option value={member.name}>{member.name}</option>)}
+          {members.members.map((member) => <option value={member.uuid}>{member.name}</option>)}
         </select>
       </div>
     </div>
