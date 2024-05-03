@@ -1,39 +1,70 @@
-import { ChangeEvent, useState } from "react"
+import { ChangeEvent, useEffect, useState } from "react"
 import { Member, MembersList } from './Members'
+import Select, { SelectChangeEvent } from '@mui/material/Select';
+import MenuItem from '@mui/material/MenuItem';
 
-export type Expense = {
+export type ExpenseType = {
+  name: string,
   amount: number,
   payer: Member,
   involvedMembers: Member[]
 }
 
-export default function Expense(members: MembersList) {
-  let [, setAmount] = useState(0)
-  let [payer, setPayer] = useState<Member>()
+interface ExpenseProps {
+  members: MembersList,
+  onChange: (updatedExpense: ExpenseType) => void;
+}
+
+export default function Expense(props: ExpenseProps) {
+  let [expense, setExpense] = useState<ExpenseType>({} as ExpenseType)
+
+  useEffect(
+    () => { 
+      if (isValid()) {
+        props.onChange(expense)
+      }
+     }
+  ,[expense])
 
   function handleAmountChange(event: ChangeEvent<HTMLInputElement>) {
-    setAmount(parseInt(event.target.value))
+    setExpense((expense) => ({...expense, amount: parseInt(event.target.value)}))
   }
 
-  function handleSelectPayer(event: ChangeEvent<HTMLSelectElement>) {
-    let payer = members.members.find((member) => member.uuid === event.target.value)
-    setPayer(payer)
+  function handleNameChange(event: ChangeEvent<HTMLInputElement>) {
+    setExpense((expense) => ({...expense, name: event.target.value}))
+  }
+
+  function handleSelectPayer(event: SelectChangeEvent<string>) {
+    let payer = props.members.find((member) => member.uuid === event.target.value)
+    if (typeof payer !== undefined) {
+      setExpense((expense) => ({...expense, payer: payer as Member}))
+    }
+  }
+
+  function isValid(): boolean {
+    
   }
 
   return (
     <div>
-      <div>
-        Expense
+      <div style={{paddingBottom: '20px'}}>
+        <span style={{paddingRight: '10px'}}>Expense name:</span>
+        <input onChange={handleNameChange} />
       </div>
-      <div>
-        Amount:
+      <div style={{paddingBottom: '20px'}}>
+        <span style={{paddingRight: '10px'}}>Amount:</span>
         <input onChange={handleAmountChange} />
       </div>
       <div>
-        Paid by: {payer?.name}
-        <select onChange={handleSelectPayer}>
-          {members.members.map((member) => <option value={member.uuid}>{member.name}</option>)}
-        </select>
+        <span style={{paddingRight: '10px'}}>Paid by: {expense.payer?.name}</span>
+        <Select
+          onChange={handleSelectPayer}
+          labelId="demo-simple-select-label"
+          id="demo-simple-select"
+          value={expense.payer?.name}
+          label="Payer">
+          {props.members.map((member) => <MenuItem key={member.uuid} value={member.uuid}>{member.name}</MenuItem>)}
+        </Select>
       </div>
     </div>
   )
