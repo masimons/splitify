@@ -1,4 +1,4 @@
-import { ChangeEvent, useEffect, useState } from "react"
+import { ChangeEvent, useCallback, useEffect, useState } from "react"
 import { Member, MembersList } from './Members'
 import Select, { SelectChangeEvent } from '@mui/material/Select';
 import MenuItem from '@mui/material/MenuItem';
@@ -15,12 +15,25 @@ interface ExpenseProps {
   onChange: (updatedExpense: ExpenseType) => void;
 }
 
+function isValid(expense: ExpenseType): boolean {
+  console.log("isvalid")
+  if (expense.name?.length > 0
+    && expense.amount > 0
+    // && expense.involvedMembers?.length > 2
+    && Boolean(expense.payer)
+  ) {
+    return true
+  }
+
+  return false
+}
+
 export default function Expense(props: ExpenseProps) {
   let [expense, setExpense] = useState<ExpenseType>({} as ExpenseType)
 
   useEffect(
     () => { 
-      if (isValid()) {
+      if (isValid(expense)) {
         props.onChange(expense)
       }
      }
@@ -34,16 +47,12 @@ export default function Expense(props: ExpenseProps) {
     setExpense((expense) => ({...expense, name: event.target.value}))
   }
 
-  function handleSelectPayer(event: SelectChangeEvent<string>) {
+  const handleSelectPayer = useCallback((event: SelectChangeEvent<string>) => {
     let payer = props.members.find((member) => member.uuid === event.target.value)
     if (typeof payer !== undefined) {
       setExpense((expense) => ({...expense, payer: payer as Member}))
     }
-  }
-
-  function isValid(): boolean {
-    
-  }
+  }, [setExpense])
 
   return (
     <div>
@@ -61,7 +70,7 @@ export default function Expense(props: ExpenseProps) {
           onChange={handleSelectPayer}
           labelId="demo-simple-select-label"
           id="demo-simple-select"
-          value={expense.payer?.name}
+          value={expense.payer?.uuid || ''}
           label="Payer">
           {props.members.map((member) => <MenuItem key={member.uuid} value={member.uuid}>{member.name}</MenuItem>)}
         </Select>

@@ -22,6 +22,13 @@ function AddExpenseDialog(props: AddExpenseDialogProps) {
     setExpense(updatedExpense)
   }
 
+  function handleSubmit() {
+    if (!!expense) {
+      props.onSubmit(expense)
+      props.onClose()
+    }
+  }
+
   return (
     <Dialog
       open={props.open}
@@ -32,11 +39,11 @@ function AddExpenseDialog(props: AddExpenseDialogProps) {
       <DialogTitle>New Expense</DialogTitle>
       <DialogContent>
         <Box sx={{p: 3}}>
-          <Expense onChange={setExpense} members={props.members} />
+          <Expense onChange={onChange} members={props.members} />
         </Box>
       </DialogContent>
       <DialogActions>
-        {/* <Button type="submit" onClick={props.onSubmit(expense)}>Add</Button> */}
+        <Button type="submit" disabled={!expense} onClick={handleSubmit}>Add</Button>
       </DialogActions>
     </Dialog>
   )
@@ -47,14 +54,16 @@ export default function Group() {
   let [expenses, setExpenses] = useState<ExpenseType[]>([])
   const [open, setExpenseOpen] = useState(false)
   const handleExpenseOpen = () => setExpenseOpen(true)
-  // const handleExpenseClose = () => setExpenseOpen(false)
+  const handleExpenseClose = () => setExpenseOpen(false)
 
-  function handleExpenseClose() {
-    setExpenseOpen(false)
-  }
+  // function handleExpenseClose() {
+  //   setExpenseOpen(false)
+  // }
 
-  function createExpense(expense: ExpenseType) {
-    alert(expense)
+  function createExpense(updatedExpense: ExpenseType) {
+    setExpenses((expenses) => {
+      return [...expenses, updatedExpense]
+    })
   }
 
   function onMemberAdd(members: MembersList) {
