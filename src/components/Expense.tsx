@@ -2,24 +2,34 @@ import { ChangeEvent, useCallback, useEffect, useState } from "react"
 import { Member, MembersList } from './Members'
 import Select, { SelectChangeEvent } from '@mui/material/Select';
 import MenuItem from '@mui/material/MenuItem';
+import Box from "@mui/material/Box";
+import Chip from "@mui/material/Chip";
+import OutlinedInput from "@mui/material/OutlinedInput";
 
 export type ExpenseType = {
   name: string,
   amount: number,
   payer: Member,
-  involvedMembers: Member[]
+  involvedMembers: string[]
+}
+
+type FormExpense = {
+  name: string,
+  amount: number,
+  payer: Member | null,
+  involvedMembers: string[]
 }
 
 interface ExpenseProps {
   members: MembersList,
+  expense?: ExpenseType,
   onChange: (updatedExpense: ExpenseType) => void;
 }
 
 function isValid(expense: ExpenseType): boolean {
-  console.log("isvalid")
-  if (expense.name?.length > 0
+  if (expense.name.length > 0
     && expense.amount > 0
-    // && expense.involvedMembers?.length > 2
+    && expense.involvedMembers?.length > 0
     && Boolean(expense.payer)
   ) {
     return true
@@ -28,51 +38,100 @@ function isValid(expense: ExpenseType): boolean {
   return false
 }
 
+function buildExpense({
+  name,
+  amount,
+  payer,
+  involvedMembers,
+}: FormExpense): ExpenseType | null {
+  if (payer === null) {
+    return null
+  }
+
+  return {
+    name,
+    amount,
+    payer,
+    involvedMembers
+  } satisfies ExpenseType
+}
+
 export default function Expense(props: ExpenseProps) {
-  let [expense, setExpense] = useState<ExpenseType>({} as ExpenseType)
+  let [name, setName] = useState<ExpenseType["name"]>(props.expense?.name || "")
+  let [amount, setAmount] = useState<ExpenseType["amount"]>(0)
+  let [payer, setPayer] = useState<ExpenseType["payer"] | null>(null)
+  let [involvedMembers, setInvolvedMembers] = useState<ExpenseType["involvedMembers"]>([])
 
   useEffect(
-    () => { 
-      if (isValid(expense)) {
+    () => {
+      const expense = buildExpense({name, amount, payer, involvedMembers})
+      if (!!expense && isValid(expense)) {
         props.onChange(expense)
       }
-     }
-  ,[expense])
+    }
+  ,[name, amount, payer, involvedMembers])
 
   function handleAmountChange(event: ChangeEvent<HTMLInputElement>) {
-    setExpense((expense) => ({...expense, amount: parseInt(event.target.value)}))
+    setAmount(parseInt(event.target.value))
   }
 
   function handleNameChange(event: ChangeEvent<HTMLInputElement>) {
-    setExpense((expense) => ({...expense, name: event.target.value}))
+    setName(event.target.value)
   }
+
+  const handleInvolvedMemberChange = useCallback((event: SelectChangeEvent<typeof involvedMembers>) => {
+    setInvolvedMembers([...event.target.value])
+  }, [setInvolvedMembers, involvedMembers])
 
   const handleSelectPayer = useCallback((event: SelectChangeEvent<string>) => {
     let payer = props.members.find((member) => member.uuid === event.target.value)
-    if (typeof payer !== undefined) {
-      setExpense((expense) => ({...expense, payer: payer as Member}))
+    if (typeof payer !== "undefined") {
+      setPayer(payer)
     }
-  }, [setExpense])
+  }, [setPayer])
 
   return (
     <div>
       <div style={{paddingBottom: '20px'}}>
         <span style={{paddingRight: '10px'}}>Expense name:</span>
-        <input onChange={handleNameChange} />
+        <input value={name} onChange={handleNameChange} />
       </div>
       <div style={{paddingBottom: '20px'}}>
         <span style={{paddingRight: '10px'}}>Amount:</span>
         <input onChange={handleAmountChange} />
       </div>
       <div>
-        <span style={{paddingRight: '10px'}}>Paid by: {expense.payer?.name}</span>
+        <span style={{paddingRight: '10px'}}>Paid by: {payer?.name}</span>
         <Select
           onChange={handleSelectPayer}
           labelId="demo-simple-select-label"
           id="demo-simple-select"
-          value={expense.payer?.uuid || ''}
+          value={payer?.uuid || ''}
           label="Payer">
           {props.members.map((member) => <MenuItem key={member.uuid} value={member.uuid}>{member.name}</MenuItem>)}
+        </Select>
+        <Select
+          label="Involved parties"
+          multiple
+          value={involvedMembers}
+          onChange={handleInvolvedMemberChange}
+          input={<OutlinedInput id="select-multiple-chip" label="Chip" />}
+          renderValue={(selected) => (
+            <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 0.5 }}>
+              {selected.map((value) => (
+                <Chip key={value} label={value} />
+              ))}
+            </Box>
+          )}
+        >
+          {props.members.map((member) => (
+            <MenuItem
+              key={member.uuid}
+              value={member.uuid}
+            >
+              {member.name}
+            </MenuItem>
+          ))}
         </Select>
       </div>
     </div>

@@ -12,15 +12,20 @@ interface AddExpenseDialogProps {
   open: boolean,
   onClose: ()=> void,
   members: MembersList,
-  onSubmit: (expense: ExpenseType) => void
+  onSubmit: (expense: ExpenseType) => void,
+  expense?: ExpenseType // ExpenseType | undefined
 }
 
 function AddExpenseDialog(props: AddExpenseDialogProps) {
-  let [expense, setExpense] = useState<ExpenseType|undefined>()
+  let [expense, setExpense] = useState<ExpenseType|undefined>(props.expense)
 
   function onChange(updatedExpense: ExpenseType) {
     setExpense(updatedExpense)
   }
+
+  // set expense to undefined on save with useEffect
+  // useCallback to setExpense to the updated expense
+  // 
 
   function handleSubmit() {
     if (!!expense) {
@@ -36,14 +41,14 @@ function AddExpenseDialog(props: AddExpenseDialogProps) {
       aria-labelledby="modal-modal-title"
       aria-describedby="modal-modal-description"
     >
-      <DialogTitle>New Expense</DialogTitle>
+      <DialogTitle>{!!expense ? "Edit Expense" : "New Expense"}</DialogTitle>
       <DialogContent>
         <Box sx={{p: 3}}>
-          <Expense onChange={onChange} members={props.members} />
+          <Expense expense={expense} onChange={onChange} members={props.members} />
         </Box>
       </DialogContent>
       <DialogActions>
-        <Button type="submit" disabled={!expense} onClick={handleSubmit}>Add</Button>
+        <Button type="submit" disabled={!expense} onClick={handleSubmit}>Save</Button>
       </DialogActions>
     </Dialog>
   )
@@ -53,12 +58,14 @@ export default function Group() {
   let [members, setMembers] = useState<MembersList>([])
   let [expenses, setExpenses] = useState<ExpenseType[]>([])
   const [open, setExpenseOpen] = useState(false)
-  const handleExpenseOpen = () => setExpenseOpen(true)
-  const handleExpenseClose = () => setExpenseOpen(false)
-
-  // function handleExpenseClose() {
-  //   setExpenseOpen(false)
-  // }
+  const [expense, setExpense] = useState<ExpenseType>()
+  const handleExpenseOpen = (expense: ExpenseType | undefined) => {
+    setExpenseOpen(true)
+    setExpense(expense)
+  }
+  const handleExpenseClose = () => {
+    setExpenseOpen(false)
+  }
 
   function createExpense(updatedExpense: ExpenseType) {
     setExpenses((expenses) => {
@@ -76,9 +83,11 @@ export default function Group() {
       <Members onChange={onMemberAdd} />
       <div>
         <h1>Expenses:</h1>
-        <Button onClick={handleExpenseOpen}>Add Expense</Button>
-        <AddExpenseDialog onSubmit={createExpense} open={open} onClose={handleExpenseClose} members={members} />
-        {expenses.map((expense) => expense.name)}
+        <Button onClick={() => handleExpenseOpen(undefined)}>Add Expense</Button>
+        <AddExpenseDialog onSubmit={createExpense} expense={expense} open={open} onClose={handleExpenseClose} members={members} />
+        <ul>
+          {expenses.map((expense) => <li><a onClick={() => handleExpenseOpen(expense)}>{expense.name}</a></li>)}
+        </ul>
       </div>
     </div> 
   )
