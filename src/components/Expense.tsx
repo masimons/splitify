@@ -65,23 +65,25 @@ export default function Expense(props: ExpenseProps) {
   useEffect(
     () => {
       const expense = buildExpense({name, amount, payer, involvedMembers})
+      console.log('update', expense, name, amount, payer, involvedMembers)
       if (!!expense && isValid(expense)) {
         props.onChange(expense)
+        console.log('onChange called')
       }
     }
-  ,[name, amount, payer, involvedMembers])
+  ,[name, amount, payer, involvedMembers, props.onChange])
 
-  function handleAmountChange(event: ChangeEvent<HTMLInputElement>) {
+  const handleAmountChange = useCallback((event: ChangeEvent<HTMLInputElement>) => {
     setAmount(parseInt(event.target.value))
-  }
+  }, [setAmount])
 
-  function handleNameChange(event: ChangeEvent<HTMLInputElement>) {
+  const handleNameChange = useCallback((event: ChangeEvent<HTMLInputElement>) => {
     setName(event.target.value)
-  }
+  }, [setName])
 
   const handleInvolvedMemberChange = useCallback((event: SelectChangeEvent<typeof involvedMembers>) => {
     setInvolvedMembers([...event.target.value])
-  }, [setInvolvedMembers, involvedMembers])
+  }, [setInvolvedMembers])
 
   const handleSelectPayer = useCallback((event: SelectChangeEvent<string>) => {
     let payer = props.members.find((member) => member.uuid === event.target.value)

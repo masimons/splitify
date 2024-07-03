@@ -1,4 +1,4 @@
-import { useState } from "react"
+import { useCallback, useEffect, useState } from "react"
 import Members, { MembersList } from "./Members"
 import Expense, { ExpenseType } from "./Expense"
 import Box from '@mui/material/Box';
@@ -19,25 +19,35 @@ interface AddExpenseDialogProps {
 function AddExpenseDialog(props: AddExpenseDialogProps) {
   let [expense, setExpense] = useState<ExpenseType|undefined>(props.expense)
 
-  function onChange(updatedExpense: ExpenseType) {
+  // function onChange(updatedExpense: ExpenseType) {
+  //   setExpense(updatedExpense)
+  // }
+
+  const handleOnClose = useCallback(() => {
+    setExpense(undefined)
+    props.onClose()
+  }, [setExpense, props.onClose])
+
+  const onChange = useCallback((updatedExpense: ExpenseType) => {
+    console.log('updatedExpense', updatedExpense)
     setExpense(updatedExpense)
-  }
+  }, [setExpense])
 
   // set expense to undefined on save with useEffect
   // useCallback to setExpense to the updated expense
   // 
 
-  function handleSubmit() {
+  const handleSubmit = useCallback(() => {
     if (!!expense) {
       props.onSubmit(expense)
-      props.onClose()
+      handleOnClose()
     }
-  }
+  }, [handleOnClose, props.onSubmit, expense])
 
   return (
     <Dialog
       open={props.open}
-      onClose={props.onClose}
+      onClose={handleOnClose}
       aria-labelledby="modal-modal-title"
       aria-describedby="modal-modal-description"
     >
@@ -86,7 +96,7 @@ export default function Group() {
         <Button onClick={() => handleExpenseOpen(undefined)}>Add Expense</Button>
         <AddExpenseDialog onSubmit={createExpense} expense={expense} open={open} onClose={handleExpenseClose} members={members} />
         <ul>
-          {expenses.map((expense) => <li><a onClick={() => handleExpenseOpen(expense)}>{expense.name}</a></li>)}
+          {expenses.map((expense) => <li key={expense.name}><a onClick={() => handleExpenseOpen(expense)}>{expense.name}</a></li>)}
         </ul>
       </div>
     </div> 
