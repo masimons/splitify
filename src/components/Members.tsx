@@ -8,7 +8,7 @@ interface MembersProps {
 }
 
 export default function Members({onChange}: MembersProps) {
-  let [members, setMembers] = useState<MembersList>([]);
+  let [members, setMembers] = useState<MembersList>([{name: 'marissa', uuid: uuidv4()}, {name: 'jason', uuid: uuidv4()}]);
 
   useEffect(() => {
     onChange(members)

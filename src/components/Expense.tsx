@@ -58,17 +58,15 @@ function buildExpense({
 
 export default function Expense(props: ExpenseProps) {
   let [name, setName] = useState<ExpenseType["name"]>(props.expense?.name || "")
-  let [amount, setAmount] = useState<ExpenseType["amount"]>(0)
+  let [amount, setAmount] = useState<ExpenseType["amount"]>(props.expense?.amount || 0)
   let [payer, setPayer] = useState<ExpenseType["payer"] | null>(null)
   let [involvedMembers, setInvolvedMembers] = useState<ExpenseType["involvedMembers"]>([])
 
   useEffect(
     () => {
       const expense = buildExpense({name, amount, payer, involvedMembers})
-      console.log('update', expense, name, amount, payer, involvedMembers)
       if (!!expense && isValid(expense)) {
         props.onChange(expense)
-        console.log('onChange called')
       }
     }
   ,[name, amount, payer, involvedMembers, props.onChange])
@@ -112,6 +110,9 @@ export default function Expense(props: ExpenseProps) {
           label="Payer">
           {props.members.map((member) => <MenuItem key={member.uuid} value={member.uuid}>{member.name}</MenuItem>)}
         </Select>
+      </div>
+      <div>
+        <span>Involved members: </span>
         <Select
           label="Involved parties"
           multiple
